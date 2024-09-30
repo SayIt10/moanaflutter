@@ -5,6 +5,7 @@ import '../Views/Mail.dart';
 import '../Views/absenphoto.dart';
 import '../Views/home.dart';
 import '../Views/profiles.dart';
+import 'package:image_picker/image_picker.dart'; // Tambahkan ini untuk membuka kamera
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -19,15 +20,35 @@ class _MainWrapperState extends State<MainWrapper> {
   // Daftar halaman yang akan ditampilkan
   static final List<Widget> _screens = [
     const HomePage(),
-    const CameraPage(),
+    const AbsenPhoto(), // Tetap sediakan halaman kamera jika diperlukan
     const MailPage(),
     const ProfilePage(),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  void _onItemTapped(int index) async {
+    if (index == 1) {
+      // Ketika icon Absen (kamera) diklik
+      await _openCamera(); // Langsung memanggil fungsi untuk membuka kamera
+    } else {
+      // Untuk index lainnya, navigasi biasa
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
+
+  Future<void> _openCamera() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+    if (photo != null) {
+      // Arahkan ke halaman yang sesuai setelah foto diambil
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AbsenPhoto(file: photo), // Kirim foto ke halaman AbsenPhoto
+        ),
+      );
+    }
   }
 
   Widget _buildIconWithText(IconData iconData, String text, bool isSelected) {
@@ -37,7 +58,7 @@ class _MainWrapperState extends State<MainWrapper> {
       height: 40,
       decoration: BoxDecoration(
         color: isSelected ? Colors.white : Colors.transparent,
-        borderRadius: BorderRadius.circular(20), // Sesuaikan dengan bentuk navbar
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -70,7 +91,7 @@ class _MainWrapperState extends State<MainWrapper> {
         children: [
           Container(
             height: 55,
-            margin: EdgeInsets.only(bottom: 20, right: 20, left: 20),
+            margin: const EdgeInsets.only(bottom: 20, right: 20, left: 20),
             decoration: BoxDecoration(
               color: const Color(0xFFff9999), // Background color dari navbar
               borderRadius: BorderRadius.circular(30),
@@ -82,7 +103,7 @@ class _MainWrapperState extends State<MainWrapper> {
                 ),
               ],
             ),
-            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [

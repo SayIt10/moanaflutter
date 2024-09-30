@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_udid/flutter_udid.dart';
 import 'package:http/http.dart' as http;
@@ -49,8 +50,12 @@ class MyApp extends StatelessWidget {
       // Make the HTTP request
       final response = await http.get(Uri.parse(url));
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      if (kDebugMode) {
+        print('Response status: ${response.statusCode}');
+      }
+      if (kDebugMode) {
+        print('Response body: ${response.body}');
+      }
 
       // Check if the status code is OK
       if (response.statusCode == 200) {
@@ -106,12 +111,18 @@ class MyApp extends StatelessWidget {
           GlobalVar.nik = user.nik;
           GlobalVar.userId = user.userId;
 
-          print('User NIK: ${user.nik}');
-          print('User ID: ${user.userId}');
+          if (kDebugMode) {
+            print('User NIK: ${user.nik}');
+          }
+          if (kDebugMode) {
+            print('User ID: ${user.userId}');
+          }
         }
       }
     } catch (e) {
-      print('Error getting user ID: $e');
+      if (kDebugMode) {
+        print('Error getting user ID: $e');
+      }
     }
   }
 }

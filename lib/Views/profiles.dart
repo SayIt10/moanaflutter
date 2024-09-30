@@ -56,6 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
         latitude: latitude,
         longitude: longitude,
       );
+
       String data = json.encode(item);
       var response = await http.post(
         Uri.parse("${baseUrl}api/Absent/FindClosestBranch"),
@@ -93,15 +94,21 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             SizedBox(
-              height: 250, // Total tinggi container pertama
+              height: 220, // Total tinggi container pertama
               child: Stack(
                 children: [
-                  SizedBox(
-                    height: 200,
-                    width: double.infinity,
-                    child: Image.asset(
-                      'assets/images/moana_header_2.png',
-                      fit: BoxFit.fill,
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(24), // Radius pada bagian bawah kiri
+                      bottomRight: Radius.circular(24), // Radius pada bagian bawah kanan
+                    ),
+                    child: SizedBox(
+                      height: 200,
+                      width: double.infinity,
+                      child: Image.asset(
+                        'assets/images/moana_header_2.png',
+                        fit: BoxFit.cover, // Menyesuaikan ukuran gambar
+                      ),
                     ),
                   ),
                   // Salam dan nama employee di atas gambar
@@ -157,20 +164,86 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      _infoRow("NIP", nip),
-                      _infoRow("Finger ID", fingerId),
-                      _infoRow("Lokasi", lokasi),
-                      if (qrCodeData.isNotEmpty)
-                        QrImageView(
-                          data: qrCodeData,
-                          version: QrVersions.auto,
-                          size: 200.0,
+                      // Bagian QR Code dan Tombol Refresh
+                      Container(
+                        width: double.infinity, // Lebar container mengikuti lebar layar
+                        decoration: BoxDecoration(
+                          color: Colors.transparent, // Background transparan
+                          border: Border.all(
+                            color: Colors.grey, // Warna border
+                            width: 1, // Ketebalan border
+                          ),
+                          borderRadius: BorderRadius.circular(16), // Radius sudut
                         ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          await loadProfile();
-                        },
-                        child: Text("Refresh"),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            if (qrCodeData.isNotEmpty)
+                              QrImageView(
+                                data: qrCodeData,
+                                version: QrVersions.auto,
+                                size: 145.0,
+                              ),
+                            const SizedBox(height: 20), // Jarak antara QR dan tombol
+                            SizedBox(
+                              width: double.infinity, // Tombol Refresh dengan lebar penuh
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  await loadProfile();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF034ea2), // Warna background tombol
+                                  foregroundColor: Colors.white, // Warna teks tombol
+                                  padding: const EdgeInsets.symmetric(vertical: 10), // Jarak vertikal dalam tombol
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24), // Radius sudut tombol
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Refresh Qr Code",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold, // Mengubah teks menjadi bold
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20), // Jarak antara frame QR dan frame informasi
+
+                      // Bagian Informasi dengan judul "Informasi Profile"
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Informasi Profile",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10), // Jarak antara judul dan frame informasi
+                          Container(
+                            width: double.infinity, // Lebar container mengikuti lebar layar
+                            decoration: BoxDecoration(
+                              color: Colors.transparent, // Background transparan
+                              border: Border.all(
+                                color: Colors.grey, // Warna border
+                                width: 1, // Ketebalan border
+                              ),
+                              borderRadius: BorderRadius.circular(16), // Radius sudut
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              children: [
+                                _infoRow("NIP", nip),
+                                _infoRow("Finger ID", fingerId),
+                                _infoRow("Lokasi", lokasi),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -182,8 +255,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
-
   String _getGreeting() {
     var dateTime = DateTime.now().hour;
     if (dateTime >= 0 && dateTime <= 11) return "Selamat Pagi,";
