@@ -28,7 +28,7 @@ class _MailPageState extends State<MailPage> {
     try {
       String ipAddress = 'https://moana1.indolife.co.id/';
 
-      final response = await http.get(Uri.parse(ipAddress + 'api/Info/GetInfo'));
+      final response = await http.get(Uri.parse('${ipAddress}api/Info/GetInfo'));
       if (response.statusCode == 200) {
         var resData = json.decode(response.body);
         infoList = (resData as List).map((data) => Info.fromJson(data)).toList();

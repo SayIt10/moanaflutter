@@ -2,7 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_udid/flutter_udid.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:moanaflutter/main.dart';
+
+import '../popup/popuplaporanabsen.dart';
+import '../popup/popupriwayatabsen.dart';
+import 'daftarrequestabsen.dart';
+import 'laporanabsen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -52,7 +58,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
   // Load cuti tahunan and besar from API
   Future<void> loadCutiTahunan() async {
     try {
@@ -61,10 +66,11 @@ class _HomePageState extends State<HomePage> {
 
       if (response.statusCode == 200) {
         var cutiData = jsonDecode(response.body);
-        setState(() {
-          cutiBesar = cutiData['CutiBesar'].toString();
-          cutiTahunan = cutiData['CutiTahunan'].toString();
-        });
+        globalVar.cutiBesar = cutiData['CutiBesar'].toString(); // Set global variable
+        globalVar.cutiTahunan = cutiData['CutiTahunan'].toString(); // Set global variable
+        globalVar.cbtgl_awal = cutiData['TGL_AWAL'].toString();
+      } else {
+        showAlert("Error", "Failed to load cuti data: ${response.statusCode}");
       }
     } catch (e) {
       showAlert("Error loading cuti", e.toString());
@@ -207,7 +213,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   Text(
-                                    cutiBesar,
+                                    globalVar.cutiBesar,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black,
@@ -226,7 +232,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   Text(
-                                    cutiTahunan,
+                                    globalVar.cutiTahunan,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black,
@@ -242,58 +248,92 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: GridView.count(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 20,
-                      crossAxisSpacing: 20,
-                      children: [
-                        _buildFeatureButton(
-                          context,
-                          'Laporan Absen',
-                          'assets/images/laporan.png',
-                              () {
-                            // Implement action
-                          },
-                        ),
-                        _buildFeatureButton(
-                          context,
-                          'Outstanding',
-                          'assets/images/getoutstanding.png',
-                              () {
-                            // Implement action
-                          },
-                        ),
-                        _buildFeatureButton(
-                          context,
-                          'Riwayat Presensi',
-                          'assets/images/history.png',
-                              () {
-                            // Implement action
-                          },
-                        ),
-                        _buildFeatureButton(
-                          context,
-                          'Request Absen',
-                          'assets/images/request.png',
-                              () {
-                            // Implement action
-                          },
-                        ),
-                        _buildFeatureButton(
-                          context,
-                          'Notification',
-                          'assets/images/notification.png',
-                              () {
-                            // Implement action
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(20),
+                        child: GridView.count(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 20,
+                          crossAxisSpacing: 20,
+                          children: [
+                            _buildFeatureButton(
+                              context,
+                              'Laporan Absen',
+                              'assets/images/laporan.png',
+                                  () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return DateRangePopup(
+                                      onDateSelected: (startDate, endDate) {
+                                        if (startDate != null && endDate != null) {
+                                          // Navigasi ke LaporanAbsenPage dengan tanggal yang dipilih
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => LaporanAbsenPage(
+                                                startDate: startDate,
+                                                endDate: endDate,
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Silakan pilih tanggal mulai dan akhir.')),
+                                          );
+                                        }
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                            _buildFeatureButton(
+                              context,
+                              'Outstanding',
+                              'assets/images/getoutstanding.png',
+                                  () {
+                                // Implement action
+                              },
+                            ),
+                            _buildFeatureButton(
+                              context,
+                              'Riwayat Presensi',
+                              'assets/images/history.png',
+                                  () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return PopupRiwayatAbsen();
+                                  },
+                                );
+                              },
+                            ),
+                            _buildFeatureButton(
+                              context,
+                              'Request Absen',
+                              'assets/images/request.png',
+                                  () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DaftarRequestAbsent(), // Navigasi ke halaman DaftarRequestAbsent
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildFeatureButton(
+                                  context,
+                                  'Notification',
+                                  'assets/images/notification.png',
+                                      () {
+                                    // Implement action
+                                  },
+                                ),
+                              ],
+                            ),
+                      ),
                 ),
               ],
             ),
@@ -340,4 +380,10 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
+}
+
+class globalVar {
+  static String cutiBesar = ""; // Initialize as empty string
+  static String cutiTahunan = ""; // Initialize as empty string
+  static String cbtgl_awal = "";
 }

@@ -95,8 +95,12 @@ class MyApp extends StatelessWidget {
       // Make the HTTP request
       final response = await http.get(Uri.parse(url));
 
-      print('User Response status: ${response.statusCode}');
-      print('User Response body: ${response.body}');
+      if (kDebugMode) {
+        print('User Response status: ${response.statusCode}');
+      }
+      if (kDebugMode) {
+        print('User Response body: ${response.body}');
+      }
 
       // Check if the status code is OK
       if (response.statusCode == 200) {
